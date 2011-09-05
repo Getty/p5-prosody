@@ -1,8 +1,8 @@
 package Prosody::Storage::SQL::DB::Result::Prosody;
 # ABSTRACT: Result class for the prosody table
 
-use Moose;
 use DBIx::Class::Candy;
+use Moose;
 
 table 'prosody';
 
