@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.002     2011-09-05 22:46:39 Europe/Berlin
 	- First DBIx::Class::Candy, then Moose (mst++ ribasushi++)
 
 0.001     2011-05-25 23:56:39 Europe/Berlin
