@@ -5,6 +5,7 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use Prosody::Storage::SQL::DB;
 use JSON;
+use Encode;
 
 has driver => (
 	is => 'ro',
@@ -126,7 +127,7 @@ sub get_value {
 	if ($row->type eq 'string') {
 		return $row->value;
 	} elsif ($row->type eq 'json') {
-		return decode_json($row->value);
+		return decode_json(encode('utf8', $row->value));
 	}
 }
 
