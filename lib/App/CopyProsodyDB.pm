@@ -1,4 +1,5 @@
 package App::CopyProsodyDB;
+# ABSTRACT: Class of the copy_prosody_db script
 
 use Moose;
 use Moose::Util::TypeConstraints;
