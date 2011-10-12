@@ -91,8 +91,6 @@ sub _build__trg {
 	return Prosody::Storage::SQL->new(%vars);
 }
 
-use Data::Printer;
-
 sub BUILD {
 	my ( $self ) = @_;
 	for ($self->_src->rs->search({})->all) {
