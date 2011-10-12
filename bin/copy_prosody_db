@@ -1,0 +1,5 @@
+#!/usr/bin/env perl
+
+use App::CopyProsodyDB;
+
+App::CopyProsodyDB->new_with_options;
