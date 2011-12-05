@@ -4,6 +4,7 @@ use Moose;
 use LWP::UserAgent;
 use JSON;
 use Encode;
+use HTTP::Request;
 
 our $VERSION ||= '0.0development';
 
@@ -38,7 +39,6 @@ has password => (
 );
 
 sub http_agent { __PACKAGE__.'/'.$VERSION }
-sub realm { 'WallyWorld' }
 
 has _useragent => (
 	is => 'ro',
@@ -50,18 +50,47 @@ sub _build__useragent {
 	my ( $self ) = @_;
 	my $ua = LWP::UserAgent->new;
 	$ua->agent($self->http_agent);
-	$ua->credentials($self->hostname.':'.$self->port,$self->realm,$self->jid,$self->password);
 	return $ua;
+}
+
+has base_path => (
+	is => 'ro',
+	isa => 'Str',
+	lazy_build => 1,
+);
+
+sub _build_base_path {
+	my ( $self ) = @_;
+	my @jid_parts = split('@',$self->jid);
+	return 'http://'.$self->hostname.':'.$self->port.'/'.$self->first_path_part.'/'.$jid_parts[1].'/';
 }
 
 sub get {
 	my ( $self, $user, $store ) = @_;
 	$store = 'accounts' if !$store;
-	my @jid_parts = split('@',$self->jid);
-	my $url = 'http://'.$self->hostname.':'.$self->port.'/'.$self->first_path_part.'/'.$jid_parts[1].'/'.$user.'/'.$store.'/json';
-	my $res = $self->_useragent->get($url);
+	my $url = $self->base_path.$user.'/'.$store.'/json';
+	my $req = HTTP::Request->new('GET',$url);
+	$req->authorization_basic($self->jid,$self->password);
+	my $res = $self->_useragent->request($req);
 	if ($res->is_success) {
 		return decode_json(encode('utf8', $res->content));
+	} else {
+		die __PACKAGE__." error on HTTP request: ".$res->status_line;
+	}
+}
+
+sub put {
+	my ( $self, $user, $store, $data ) = @_;
+	$store = 'accounts' if !$store;
+	my @jid_parts = split('@',$self->jid);
+	my $url = $self->base_path.$user.'/'.$store.'/lua';
+	my $req = HTTP::Request->new('PUT',$url);
+	$req->content(encode_json($data));
+	$req->header('Content-Type' => 'application/json');
+	$req->authorization_basic($self->jid,$self->password);
+	my $res = $self->_useragent->request($req);
+	if ($res->is_success) {
+		return 1;
 	} else {
 		die __PACKAGE__." error on HTTP request: ".$res->status_line;
 	}
